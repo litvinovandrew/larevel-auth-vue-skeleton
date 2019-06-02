@@ -6,6 +6,7 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
+use App\Models\LinkedSocialAccount;
 
 class User extends Authenticatable
 {
@@ -79,5 +80,10 @@ class User extends Authenticatable
         return $this->hasRole('admin');
     }
 
+
+    public function linkedSocialAccounts()
+    {
+        return $this->hasMany(LinkedSocialAccount::class);
+    }
 
 }

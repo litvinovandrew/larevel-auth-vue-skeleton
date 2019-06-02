@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\SocialAccountsService;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Laravel\Socialite\Facades\Socialite;
 
 class LoginController extends Controller
 {
@@ -46,5 +48,44 @@ class LoginController extends Controller
         }
 
         return redirect('/');
+    }
+
+    /**
+     * Redirect the user to the provider authentication page.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function redirectToProvider($driver)
+    {
+        return Socialite::driver($driver)->redirect();
+
+    }
+
+    /**
+     * Obtain the user information from provider.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function handleProviderCallback($driver)
+    {
+
+        try {
+            $providerUser = Socialite::driver($driver)->user();
+        } catch (\Exception $e) {
+            echo PHP_EOL . PHP_EOL . '<br><br>File: ' . __FILE__ . '<br>' . PHP_EOL;
+            echo 'Line: ' . (__LINE__ + 1) . '<br>' . PHP_EOL; die(var_dump($e));
+            echo '<br><br>' . PHP_EOL . PHP_EOL;
+            return redirect()->route('/');
+        }
+
+        if ($providerUser) {
+            $existingUser =  (new SocialAccountsService())->findOrCreate($providerUser, $driver);
+            auth()->login($existingUser, true);
+        }
+
+        return redirect()->route('home');
+
+
+
     }
 }
